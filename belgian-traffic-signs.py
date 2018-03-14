@@ -50,3 +50,36 @@ print("images_flat: ", images_flat)
 print("logits: ", logits)
 print("loss: ", loss)
 print("predicted_labels: ", correct_pred)
+
+sess = tf.Session()
+
+sess.run(tf.global_variables_initializer())
+
+for i in range(201):
+        print('EPOCH', i)
+        _, accuracy_val = sess.run([train_op, accuracy], feed_dict={x: images32, y: labels})
+        if i % 10 == 0:
+            print("Loss: ", loss)
+        print('DONE WITH EPOCH')
+
+# Load the test data
+test_images, test_labels = load_data(test_data_directory)
+
+# Transform the images to 28 by 28 pixels
+test_images28 = [transform.resize(image, (28, 28)) for image in test_images]
+
+# Convert to grayscale
+from skimage.color import rgb2gray
+test_images28 = rgb2gray(np.array(test_images28))
+
+# Run predictions against the full test set.
+predicted = sess.run([correct_pred], feed_dict={x: test_images28})[0]
+
+# Calculate correct matches 
+match_count = sum([int(y == y_) for y, y_ in zip(test_labels, predicted)])
+
+# Calculate the accuracy
+accuracy = match_count / len(test_labels)
+
+# Print the accuracy
+print("Accuracy: {:.3f}".format(accuracy))
